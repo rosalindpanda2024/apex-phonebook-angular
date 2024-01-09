@@ -17,7 +17,7 @@ const urls = [
         method: 'POST',
         getData: (request, id) => {
             request.body.id = storage.data.length + 1;
-            // storage.data.push(request.body)
+            storage.data.push(request.body)
             return request.body
         }
     }, {

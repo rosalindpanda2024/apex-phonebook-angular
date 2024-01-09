@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ContactService} from "../../services/contacts.service";
-import {NgForm} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormGroup, NgForm, Validators} from "@angular/forms";
 import {Contact} from "../contact-list/contact";
 
 @Component({
@@ -12,29 +12,50 @@ export class ContactFormComponent implements OnInit {
     model = <Contact> {};
     submitted = false;
     btnName = 'Submit';
+    form: FormGroup;
 
-    constructor(private contactService: ContactService) {
+    constructor(private contactService: ContactService, private formBuilder: FormBuilder) {
+    }
+
+    get f(): {[key: string]: AbstractControl} {
+        return this.form.controls;
     }
 
     ngOnInit(): void {
+        this.form = this.formBuilder.group({
+            firstName: ['', Validators.required],
+            lastName: ['', Validators.required],
+            email: ['', [Validators.required, Validators.email]]
+        });
     }
 
     createNew() {
         return  {} as Contact;
     }
 
-    onSubmit(contactForm: NgForm) {
+    onSubmit() {
         this.submitted = true;
 
-        this.contactService.postContact(this.model)
+       if(this.form.valid){
+        this.model.firstName = this.form.controls['firstName'].value;
+        this.model.lastName = this.form.controls['lastName'].value;
+        this.model.email = this.form.controls['email'].value;
+
+      this.contactService.postContact(this.model)
             .subscribe(contact => {
                 console.log('object saved', contact);
                 this.model = this.createNew();
                 this.submitted = false;
-                contactForm.resetForm();
+                this.form.reset();
             });
+        }
 
         console.log('submitted');
+    }
+
+    validateContactForm(contactForm: NgForm) : boolean {
+        return true;
+
     }
 
     get diagnostic() {
